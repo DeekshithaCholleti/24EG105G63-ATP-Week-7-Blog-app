@@ -15,6 +15,7 @@ app.use(
     origin: function (origin, callback) {
       const allowedOrigins = [
         'http://localhost:5173',
+        'http://localhost:3000',
       ]
       // Allow any vercel.app subdomain
       const vercelPattern = /^https:\/\/.*\.vercel\.app$/
@@ -28,16 +29,6 @@ app.use(
     credentials: true
   })
 )
-// app.use(
-//   cors({
-//     origin: [
-//       'http://localhost:5173',
-//       'https://atp-24-eg-105-g54-blogg-git-035ccb-akhileshs-projects-7e082507.vercel.app',
-//       'https://atp-24-eg-105-g54-blogg-app.vercel.app'  // ← add this
-//     ],
-//     credentials: true
-//   })
-// )
 
 //add cookie parser middleware
 app.use(cookieParser())
@@ -56,14 +47,22 @@ const connectDB = async () => {
   try {
     await connect(process.env.DB_URL, { family: 4 })
     console.log('DB Connected')
-    const port = process.env.PORT
-    app.listen(port, () => console.log(`Server listening on ${port}`))
   } catch (err) {
     console.log('Error in DB Connect', err)
   }
 }
 
-connectDB()
+// Only call connectDB and listen in local development
+if (process.env.NODE_ENV !== 'production') {
+  connectDB()
+  const port = process.env.PORT || 5000
+  app.listen(port, () => console.log(`Server listening on ${port}`))
+}
+
+// For production (Vercel), ensure DB is connected
+if (process.env.NODE_ENV === 'production') {
+  connectDB()
+}
 
 //to handle invalid path
 app.use((req, res, next) => {
@@ -88,3 +87,6 @@ app.use((err, req, res, next) => {
   //Send server side errors
   res.status(500).json({ message: 'Error occured', error: err.message })
 })
+
+// Export app for Vercel
+export default app
