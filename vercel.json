@@ -5,16 +5,10 @@
   "env": {
     "NODE_ENV": "production"
   },
-  "functions": {
-    "Backend/server.js": {
-      "memory": 1024,
-      "maxDuration": 60
-    }
-  },
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "Backend/server.js"
+      "dest": "/Backend/api/handler.js"
     },
     {
       "src": "/(.*)",
